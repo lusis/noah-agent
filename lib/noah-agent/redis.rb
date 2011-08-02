@@ -15,7 +15,8 @@ module Noah::Agent
           if event =~ /^\/\/noah\/watchers\/.*/
             Celluloid::Actor[:watchlist_manager].reread_watchers(message)
           else
-            Celluloid::Actor[:broker_manager].
+            Celluloid::Actor[:broker_manager].scatter(message)
+          end
         end
       end
     end
