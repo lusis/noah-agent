@@ -1,10 +1,11 @@
+require 'redis'
 module Noah::Agent
   class Redis
     include Celluloid::Actor
 
     def initialize(host,port)
       LOGGER.debug("Initializing Redis Actor")
-      @r = Redis.connect :host => host, :port => port
+      @r = ::Redis.connect :host => host, :port => port
     end
 
     def watch
@@ -15,7 +16,8 @@ module Noah::Agent
           if event =~ /^\/\/noah\/watchers\/.*/
             Celluloid::Actor[:watchlist_manager].reread_watchers(message)
           else
-            Celluloid::Actor[:broker_manager].scatter(message)
+            LOGGER.info("#{pattern} - #{event} - #{message}")
+            #Celluloid::Actor[:broker_manager].handle(message)
           end
         end
       end
