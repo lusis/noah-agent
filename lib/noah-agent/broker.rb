@@ -14,8 +14,9 @@ module Noah::Agent
       klass.supervise_as "pool_#{pool_string}".to_sym, "pool_#{pool_string}"
     end
 
-    def handle(msg)
-
+    def handle(pattern, msg)
+      Noah::Agent::LOGGER.info("Message recieved for brokering")
+      Noah::Agent::LOGGER.debug("Pattern: #{pattern}| Message: #{msg}")
     end
 
   end

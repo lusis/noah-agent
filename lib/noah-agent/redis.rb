@@ -14,10 +14,10 @@ module Noah::Agent
           LOGGER.info("Message recieved")
           LOGGER.debug("Message contents: #{message}")
           if event =~ /^\/\/noah\/watchers\/.*/
-            Celluloid::Actor[:watchlist_manager].reread_watchers(message)
+            Celluloid::Actor[:watchlist].reread_watchers(message)
           else
             LOGGER.info("#{pattern} - #{event} - #{message}")
-            #Celluloid::Actor[:broker_manager].handle(message)
+            Celluloid::Actor[:broker].handle(event, message)
           end
         end
       end
