@@ -1,4 +1,4 @@
 require 'logger'
-Noah::Agent::LOGGER = Logger.new(STDOUT)
-Noah::Agent::LOGGER.progname = "noah-agent"
-Celluloid.logger = Noah::Agent::LOGGER
+NoahAgent::LOGGER = Logger.new(STDOUT)
+NoahAgent::LOGGER.progname = "noah-agent"
+Celluloid.logger = NoahAgent::LOGGER

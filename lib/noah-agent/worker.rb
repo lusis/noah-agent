@@ -1,35 +1,27 @@
-module Noah::Agent
-  class Worker
+module NoahAgent
+  module Worker
+    ENDPOINT_PATTERN = "nil://"
 
-    def self.inherited(model)
-      model.send :include, Celluloid::Actor
-    end
+    def self.included(base)
+      base.send :include, Celluloid
+      base.send :attr_reader, :name
 
-    attr_accessor :name, :busy
-
-    WORKER_PATTERN="nil://"
-    MAX_CONCURRENCY=100
-
-    def initialize(name)
-      @name = name
-      @busy = false
-      Noah::Agent::LOGGER.info("Starting worker #{name} for pattern #{self.class::WORKER_PATTERN}")
-    end
-
-    def work(msg)
-      @busy = true
-      Thread.new do
-        Noah::Agent::LOGGER.info "Worker #{@name} is working"
-        sleep 10
-        Noah::Agent::LOGGER.debug "Message is #{msg}"
-        sleep 10
-        Noah::Agent::LOGGER.info "Finished work"
+      def initialize(name, pool_name)
+        @name = name
+        @pool_name = pool_name
       end
-      @busy = false
-    end
 
-    def busy?
-      @busy
+      protected
+      def notify(e,m)
+        begin
+          self.work(e,m)
+        rescue NoMethodError
+          LOGGER.warn("You haven't defined how I should 'work'")
+        rescue Exception => e
+          LOGGER.fatal("Unknown exception in worker: #{e.message}")
+        end
+        Celluloid::Actor[@pool_name.to_sym].free_worker(@name)
+      end
     end
   end
 end

@@ -4,7 +4,7 @@ require "noah-agent/version"
 
 Gem::Specification.new do |s|
   s.name        = "noah-agent"
-  s.version     = Noah::Agent::VERSION
+  s.version     = NoahAgent::VERSION
   s.platform    = Gem::Platform::RUBY
   s.authors     = ["TODO: Write your name"]
   s.email       = ["TODO: Write your email address"]

@@ -1,12 +1,12 @@
 require 'excon'
 require 'multi_json'
-module Noah::Agent
+module NoahAgent
   class WatchList
     include Celluloid::Actor
     attr_reader :watchlist
 
     def initialize(noah_url)
-      LOGGER.info("Starting watchlist actor")
+      LOGGER.info("Starting watchlist")
       @noah_url = noah_url
       @watchlist ||= {}
       get_watchlist
@@ -14,16 +14,16 @@ module Noah::Agent
 
     def get_watchlist
       LOGGER.info("Loading watchlist from Noah")
-      noah = ::Excon.get(@noah_url+"/watches")
+      noah = Excon.get(@noah_url+"/watches")
       case noah.status
       when 404
         LOGGER.warn("Noah returned 404. Assuming empty watchlist")
       when 500
-        data = ::MultiJson.decode(noah.body)
+        data = MultiJson.decode(noah.body)
         LOGGER.fatal("Noah returned 500. This could be bad")
         LOGGER.debug("Noah error: #{data["error_message"]}")
       when 200
-        data = ::MultiJson.decode(noah.body)
+        data = MultiJson.decode(noah.body)
         load_initial_watchers(data)
         LOGGER.info("Starting up with #{@watchlist.keys.size} watchers")
         LOGGER.debug("#{@watchlist.keys}")
@@ -32,7 +32,7 @@ module Noah::Agent
 
     def reread_watchers(new_watch)
       LOGGER.info("Watch message found")
-      w = ::MultiJson.decode(new_watch)
+      w = MultiJson.decode(new_watch)
       case w["action"]
       when "delete"
         LOGGER.info("Deleting watch: #{w["id"]}")

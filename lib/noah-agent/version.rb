@@ -1,5 +1,3 @@
-module Noah
-  module Agent
+module NoahAgent
     VERSION = "0.0.1"
-  end
 end

@@ -1,11 +1,12 @@
 require 'redis'
-module Noah::Agent
+module NoahAgent
   class Redis
-    include Celluloid::Actor
+    include Celluloid
 
     def initialize(host,port)
-      LOGGER.debug("Initializing Redis Actor")
+      LOGGER.debug("Initializing Redis connection")
       @r = ::Redis.connect :host => host, :port => port
+      self.watch!
     end
 
     def watch

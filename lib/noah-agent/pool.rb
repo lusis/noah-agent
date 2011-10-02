@@ -1,13 +1,16 @@
-module Noah::Agent
+module NoahAgent
   class Pool
-    include Celluloid::Actor
-    #include Noah::Agent::Helpers
-    attr_reader :workers
+    include Celluloid
+
+    attr_reader :available_workers, :busy_workers, :backlog, :max_worker_count
 
     def initialize(name, opts = {:num_workers => 10, :worker_class => Worker})
       @name = name
-      @workers = []
-      Noah::Agent::LOGGER.info("Pool #{name} starting up")
+      @max_worker_count = opts[:num_workers]
+      @available_workers = []
+      @busy_workers = []
+      @backlog = []
+      LOGGER.info("Pool #{name} starting up")
       opts[:num_workers].times do |worker|
         start_worker(opts[:worker_class])
       end
@@ -15,30 +18,41 @@ module Noah::Agent
 
     def start_worker(klass)
       worker_id = gen_worker_id
-      Noah::Agent::LOGGER.info("Pool #{@name} is starting a #{klass.to_s} worker")
-      @workers << (klass.supervise_as "#{@name}_worker_#{worker_id}".to_sym, "#{@name}_worker_#{worker_id}")
+      LOGGER.info("Pool #{@name} is starting a #{klass.to_s} worker")
+      wkr = klass.supervise_as("#{worker_id}".to_sym, "#{worker_id}", @name)
+      @available_workers << wkr.actor.name
     end
 
-    def notify_worker(msg)
-      worker = self.get_worker
-      worker.work msg
+    def notify_worker(ep, msg)
+      if @available_workers.size == 0
+        LOGGER.warn("All workers busy. Queueing work")
+        @backlog << [ep, msg]
+      else
+        worker = Celluloid::Actor[@available_workers.pop.to_sym]
+        LOGGER::debug("Worker grabbed from pool: #{worker.name}")
+        @busy_workers << worker.name
+        worker.notify!(ep, msg)
+        LOGGER.info("Backlog size: #{@backlog.size}. #{@busy_workers.size} workers busy. Pool status: #{@available_workers.size}/#{@max_worker_count} workers available")
+      end
+    end
+
+    def free_worker(name)
+      LOGGER.debug("Attempting to free up worker: #{name}")
+      if @backlog.size >= 1
+        LOGGER.debug("Currently #{@backlog.size} work to do. Grabbing more work")
+        ep, msg = @backlog.pop
+        wkr = Celluloid::Actor[name.to_sym]
+        wkr.notify!(ep, msg)
+      else
+        LOGGER.debug("Backlog empty. Returning to pool: #{name}")
+        @busy_workers.delete(name)
+        @available_workers << name
+      end
     end
 
     protected
     def gen_worker_id
       Digest::SHA1.hexdigest(UUID.generate)
-    end
-
-    def get_worker
-      worker = @workers.sample.actor
-      Noah::Agent::LOGGER.info("Found Worker: #{worker.name} in the pool")
-      self.get_worker if worker.busy?
-      if worker.alive?
-        worker
-      else
-        Noah::Agent::LOGGER.error "Worker #{worker.name} was dead. Retrying!"
-        self.get_worker
-      end
     end
 
   end
