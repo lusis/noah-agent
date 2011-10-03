@@ -4,7 +4,7 @@ module NoahAgent
 
     attr_reader :available_workers, :busy_workers, :backlog, :max_worker_count
 
-    def initialize(name, opts = {:num_workers => 10, :worker_class => Worker})
+    def initialize(name, opts = {:worker_class => Worker, :num_workers => 10})
       @name = name
       @max_worker_count = opts[:num_workers]
       @available_workers = []
@@ -17,6 +17,7 @@ module NoahAgent
     end
 
     def start_worker(klass)
+      klass = Kernel.const_get("NoahAgent::#{klass}".to_sym) if klass.class == String
       worker_id = gen_worker_id
       LOGGER.info("Pool #{@name} is starting a #{klass.to_s} worker")
       wkr = klass.supervise_as("#{worker_id}".to_sym, "#{worker_id}", @name)

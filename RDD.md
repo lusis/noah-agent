@@ -25,6 +25,17 @@ If there is no backlog, `worker.name` is pushed back into `@available_workers`.
 Backlog is populated when `@available_workers.size == 0`
 
 
+# Notes on flow
 
+Pull current watchlist from Noah
+Discover all known plugins (dummy, http, https...)
+Spin up pools for each plugin
+Attach to redis
+Push message to appropriate pools
 
-	
+# Notes on notifying endpoints
+- Are any watchers registered?
+- Does the pattern match any of the registered watchers?
+- If so, what's the scheme of those watchers?
+- Do we know how to handle that scheme?
+- Do we have a worker pool for it?

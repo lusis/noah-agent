@@ -4,7 +4,7 @@ module NoahAgent
     include Celluloid
 
     def initialize(host,port)
-      LOGGER.debug("Initializing Redis connection")
+      LOGGER.debug("Redis - Initializing Redis connection")
       @r = ::Redis.connect :host => host, :port => port
       self.watch!
     end
@@ -12,8 +12,8 @@ module NoahAgent
     def watch
       @r.psubscribe("*") do |on|
         on.pmessage do |pattern, event, message|
-          LOGGER.info("Message recieved")
-          LOGGER.debug("Message contents: #{message}")
+          LOGGER.info("Redis - Message recieved")
+          LOGGER.debug("Redis - Message contents: #{message}")
           if event =~ /^\/\/noah\/watchers\/.*/
             Celluloid::Actor[:watchlist].reread_watchers(message)
           else
