@@ -74,3 +74,5 @@ The idea is that now you can spin up multiple instances of the agent on differen
 
 # Usage
 Right now it makes the assumption that everything is running on localhost (redis and noah). It does, however, work. Feel free to poke around if you like.
+
+This is my first real attempt at using Celluloid and Actors seriously. Any advice, comments or rude remarks are more than welcome!
