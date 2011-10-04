@@ -18,4 +18,11 @@ Gem::Specification.new do |s|
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
   s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
   s.require_paths = ["lib"]
+
+  s.add_dependency("celluloid", ["= 0.2.2"])
+  s.add_dependency("redis", ["= 2.2.2"])
+  s.add_dependency("excon", ["= 0.7.3"])
+  s.add_dependency("slop", ["= 2.1.0"])
+  s.add_dependency("uuid", ["= 2.3.3"])
+  s.add_dependency("multi_json", ["= 1.0.3"]) # This needs to be removed at some point for real JSON libraries.
 end
