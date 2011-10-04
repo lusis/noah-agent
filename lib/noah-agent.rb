@@ -1,5 +1,6 @@
 module NoahAgent
     require 'celluloid'
+    require File.join(File.dirname(__FILE__), 'noah-agent', 'error')
     require File.join(File.dirname(__FILE__), 'noah-agent', 'watchlist')
     require File.join(File.dirname(__FILE__), 'noah-agent', 'redis')
     require File.join(File.dirname(__FILE__), 'noah-agent', 'logging')

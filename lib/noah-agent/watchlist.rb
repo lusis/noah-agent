@@ -2,19 +2,26 @@ require 'excon'
 require 'multi_json'
 module NoahAgent
   class WatchList
-    include Celluloid::Actor
+    include Celluloid
     attr_reader :watchlist
 
     def initialize(noah_url)
       LOGGER.info("Starting watchlist")
       @noah_url = noah_url
       @watchlist ||= {}
-      get_watchlist
+      self.get_watchlist!
     end
 
     def get_watchlist
       LOGGER.info("Loading watchlist from Noah")
-      noah = Excon.get(@noah_url+"/watches")
+      begin
+        noah = Excon.get(@noah_url+"/watches")
+      rescue Exception => e
+        NoahAgent::LOGGER.debug("Failed to get watches: #{e.message}")
+        NoahAgent::LOGGER.debug("Retrying in 10 seconds")
+        sleep 10
+        retry
+      end
       case noah.status
       when 404
         LOGGER.warn("Noah returned 404. Assuming empty watchlist")
